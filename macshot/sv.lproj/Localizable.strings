@@ -403,6 +403,7 @@
 "Screen Recording not yet granted" = "Sk\U00E4rminspelning \U00E4nnu inte beviljad";
 "Screen Recording granted!" = "Sk\U00E4rminspelning beviljad!";
 "Enable macshot, then try taking a screenshot" = "Aktivera macshot och ta sedan en sk\U00E4rmbild";
+"Enable Screen Recording, then quit and reopen macshot" = "Aktivera skärminspelning och öppna sedan macshot igen";
 "Open Screen Recording Settings" = "\U00D6ppna inst\U00E4llningar f\U00F6r sk\U00E4rminspelning";
 "Continue" = "Forts\U00E4tt";
 

@@ -398,6 +398,7 @@
 "Screen Recording not yet granted" = "لم يتم منح إذن تسجيل الشاشة بعد";
 "Screen Recording granted!" = "تم منح إذن تسجيل الشاشة!";
 "Enable macshot, then try taking a screenshot" = "فعّل macshot، ثم حاول التقاط الشاشة";
+"Enable Screen Recording, then quit and reopen macshot" = "فعّل تسجيل الشاشة، ثم أغلق macshot وأعد فتحه";
 "Open Screen Recording Settings" = "فتح إعدادات تسجيل الشاشة";
 "Continue" = "متابعة";
 

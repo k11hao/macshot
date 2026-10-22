@@ -403,6 +403,7 @@
 "Screen Recording not yet granted" = "Skjermopptak er ikke gitt enn\U00E5";
 "Screen Recording granted!" = "Skjermopptak er gitt!";
 "Enable macshot, then try taking a screenshot" = "Aktiver macshot, og pr\U00F8v \U00E5 ta et skjermbilde";
+"Enable Screen Recording, then quit and reopen macshot" = "Aktiver skjermopptak, og åpne macshot på nytt";
 "Open Screen Recording Settings" = "\U00C5pne innstillinger for skjermopptak";
 "Continue" = "Fortsett";
 

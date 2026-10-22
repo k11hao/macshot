@@ -404,6 +404,7 @@
 "Screen Recording not yet granted" = "尚未授予螢幕錄製權限";
 "Screen Recording granted!" = "螢幕錄製權限已授予！";
 "Enable macshot, then try taking a screenshot" = "啟用 macshot，然後試試擷取螢幕截圖";
+"Enable Screen Recording, then quit and reopen macshot" = "啟用螢幕錄製，然後結束並重新開啟 macshot";
 "Open Screen Recording Settings" = "打開螢幕錄製設定";
 "Continue" = "繼續";
 

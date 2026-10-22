@@ -405,6 +405,7 @@
 "Screen Recording not yet granted" = "स्क्रीन रिकॉर्डिंग अभी तक प्रदान नहीं की गई";
 "Screen Recording granted!" = "स्क्रीन रिकॉर्डिंग प्रदान की गई!";
 "Enable macshot, then try taking a screenshot" = "macshot सक्षम करें, फिर स्क्रीनशॉट लेने का प्रयास करें";
+"Enable Screen Recording, then quit and reopen macshot" = "स्क्रीन रिकॉर्डिंग सक्षम करें, फिर macshot बंद करके दोबारा खोलें";
 "Open Screen Recording Settings" = "स्क्रीन रिकॉर्डिंग सेटिंग्स खोलें";
 "Continue" = "जारी रखें";
 

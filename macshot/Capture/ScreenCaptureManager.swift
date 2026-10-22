@@ -6,6 +6,63 @@ struct ScreenCapture {
     let image: CGImage
 }
 
+/// Result of a ScreenCaptureKit attempt. `permissionDenied` is separate from a
+/// plain failure because macOS answers every capture API with a privacy-blurred
+/// desktop image when Screen Recording is not granted: falling back to the
+/// window-list API would produce a "successful" but useless screenshot.
+struct ScreenCaptureBatch {
+    let captures: [ScreenCapture]
+    let permissionDenied: Bool
+
+    init(captures: [ScreenCapture], permissionDenied: Bool = false) {
+        self.captures = captures
+        self.permissionDenied = permissionDenied
+    }
+}
+
+/// Process-wide Screen Recording permission state.
+///
+/// Once ScreenCaptureKit reports `SCStreamErrorUserDeclined`, every later
+/// capture API keeps returning the privacy-blurred desktop and each attempt
+/// re-triggers the system consent prompt. Remember the denial so captures stop
+/// being attempted (and the onboarding explains what to do) until the app is
+/// relaunched, which is when macOS applies a new Screen Recording grant.
+final class ScreenRecordingPermission: @unchecked Sendable {
+    static let shared = ScreenRecordingPermission()
+
+    private let lock = NSLock()
+    private var denied = false
+
+    var wasDenied: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return denied
+    }
+
+    func noteDenied() {
+        lock.lock()
+        denied = true
+        lock.unlock()
+    }
+
+    /// Lets the user retry after a refusal (for example after enabling the
+    /// permission and choosing to continue instead of relaunching).
+    func clearDenial() {
+        lock.lock()
+        denied = false
+        lock.unlock()
+    }
+
+    /// Whether an error is ScreenCaptureKit's "the user did not authorize
+    /// capture" refusal.
+    static func isUserDeclined(_ error: Error?) -> Bool {
+        guard let error else { return false }
+        let nsError = error as NSError
+        return nsError.domain == SCStreamErrorDomain
+            && nsError.code == SCStreamError.userDeclined.rawValue
+    }
+}
+
 class ScreenCaptureManager {
 
     struct ImmediateCaptureContext {
@@ -131,31 +188,39 @@ class ScreenCaptureManager {
     /// shareable content so transient UI present at hotkey time — open menus,
     /// Spotlight/Raycast panels — is in the window list and gets captured.
     /// Returns nil on any failure so the caller can fall back to the synchronous
-    /// CGWindowListCreateImage path.
+    /// CGWindowListCreateImage path. A batch with `permissionDenied` set must not
+    /// fall back: the fallback would silently capture macOS's privacy-blurred
+    /// desktop instead of the user's screen.
     @available(macOS 14.0, *)
     static func captureAllScreensImmediatelySCK(
         priorityScreen: NSScreen? = nil,
         timing: (@Sendable (String) -> Void)? = nil,
         onCapture: ((ScreenCapture) -> Void)? = nil
-    ) async -> [ScreenCapture]? {
+    ) async -> ScreenCaptureBatch? {
         let showsCursor = UserDefaults.standard.bool(forKey: "captureCursor")
         if #available(macOS 26.0, *) {
-            if let captures = await captureAllScreensImmediatelySCKRect(
+            if let batch = await captureAllScreensImmediatelySCKRect(
                 showsCursor: showsCursor,
                 priorityScreen: priorityScreen,
                 timing: timing,
                 onCapture: onCapture
             ) {
-                return captures
+                return batch
             }
         }
 
         timing?("SCK immediate: shareable content begin")
-        guard
-            let content = try? await SCShareableContent.excludingDesktopWindows(
+        let content: SCShareableContent
+        do {
+            content = try await SCShareableContent.excludingDesktopWindows(
                 false, onScreenWindowsOnly: true)
-        else {
+        } catch {
             timing?("SCK immediate: shareable content failed — fallback")
+            if ScreenRecordingPermission.isUserDeclined(error) {
+                ScreenRecordingPermission.shared.noteDenied()
+                timing?("SCK immediate: screen recording permission denied")
+                return ScreenCaptureBatch(captures: [], permissionDenied: true)
+            }
             return nil
         }
         timing?("SCK immediate: shareable content end displays=\(content.displays.count) windows=\(content.windows.count)")
@@ -177,8 +242,9 @@ class ScreenCaptureManager {
             return nil
         }
 
-        let captures = await withTaskGroup(
-            of: ScreenCapture?.self, returning: [ScreenCapture].self
+        let result = await withTaskGroup(
+            of: (ScreenCapture?, Error?).self,
+            returning: (captures: [ScreenCapture], denied: Bool).self
         ) { group in
             for (index, pair) in pairs.enumerated() {
                 let (display, screen) = pair
@@ -194,29 +260,39 @@ class ScreenCaptureManager {
                     config.showsCursor = showsCursor
                     config.captureResolution = .best
                     timing?("SCK immediate capture begin display=\(index)")
-                    guard
-                        let image = try? await SCScreenshotManager.captureImage(
+                    do {
+                        let image = try await SCScreenshotManager.captureImage(
                             contentFilter: filter, configuration: config)
-                    else {
-                        timing?("SCK immediate capture failed display=\(index)")
-                        return nil
+                        timing?("SCK immediate capture end display=\(index) pixels=\(image.width)x\(image.height)")
+                        return (ScreenCapture(screen: screen, image: image), nil)
+                    } catch {
+                        timing?("SCK immediate capture failed display=\(index) error=\(error.localizedDescription)")
+                        return (nil, error)
                     }
-                    timing?("SCK immediate capture end display=\(index) pixels=\(image.width)x\(image.height)")
-                    return ScreenCapture(screen: screen, image: image)
                 }
             }
-            var results: [ScreenCapture] = []
-            for await capture in group { if let capture = capture { results.append(capture) } }
-            return results
+            var captures: [ScreenCapture] = []
+            var denied = false
+            for await (capture, error) in group {
+                if let capture { captures.append(capture) }
+                if ScreenRecordingPermission.isUserDeclined(error) { denied = true }
+            }
+            return (captures, denied)
+        }
+
+        if result.denied {
+            ScreenRecordingPermission.shared.noteDenied()
+            timing?("SCK immediate: screen recording permission denied")
+            return ScreenCaptureBatch(captures: result.captures, permissionDenied: true)
         }
 
         // If SCK couldn't produce an image for every display, fall back rather
         // than show a partial capture.
-        guard captures.count == pairs.count else {
-            timing?("SCK immediate: partial captures \(captures.count)/\(pairs.count) — fallback")
+        guard result.captures.count == pairs.count else {
+            timing?("SCK immediate: partial captures \(result.captures.count)/\(pairs.count) — fallback")
             return nil
         }
-        return captures
+        return ScreenCaptureBatch(captures: result.captures)
     }
 
     @available(macOS 26.0, *)
@@ -225,7 +301,7 @@ class ScreenCaptureManager {
         priorityScreen: NSScreen? = nil,
         timing: (@Sendable (String) -> Void)? = nil,
         onCapture: ((ScreenCapture) -> Void)? = nil
-    ) async -> [ScreenCapture]? {
+    ) async -> ScreenCaptureBatch? {
         let screens = NSScreen.screens
         guard !screens.isEmpty else {
             timing?("SCK rect immediate: no screens — fallback")
@@ -239,7 +315,7 @@ class ScreenCaptureManager {
         // The two only coincide for the primary display — non-primary screens
         // captured with the raw AppKit frame come back vertically shifted with a
         // black stripe where the rect fell off the display (#291, #294).
-        guard let primaryScreen = screens.first else { return [] }
+        guard let primaryScreen = screens.first else { return ScreenCaptureBatch(captures: []) }
         let primaryHeight = primaryScreen.frame.maxY
         // NOTE: capture displays SEQUENTIALLY, not concurrently.
         // On macOS 26 replayd serialises concurrent SCScreenshotManager requests
@@ -281,6 +357,13 @@ class ScreenCaptureManager {
             else {
                 let reason = result.error?.localizedDescription ?? "no image returned"
                 timing?("SCK rect capture failed screen=\(index) error=\(reason)")
+                // A refusal is not a transient failure: the fallback would return
+                // a blurred desktop, so stop and let the caller ask for permission.
+                if ScreenRecordingPermission.isUserDeclined(result.error) {
+                    ScreenRecordingPermission.shared.noteDenied()
+                    timing?("SCK rect immediate: screen recording permission denied")
+                    return ScreenCaptureBatch(captures: captures, permissionDenied: true)
+                }
                 continue
             }
             timing?("SCK rect capture end screen=\(index) pixels=\(image.width)x\(image.height)")
@@ -295,7 +378,7 @@ class ScreenCaptureManager {
         }
 
         timing?("SCK rect immediate: end")
-        return captures
+        return ScreenCaptureBatch(captures: captures)
     }
 
     @available(macOS 26.0, *)

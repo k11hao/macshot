@@ -405,6 +405,7 @@
 "Screen Recording not yet granted" = "Запис екрана ще не дозволено";
 "Screen Recording granted!" = "Запис екрана дозволено!";
 "Enable macshot, then try taking a screenshot" = "Увімкніть macshot, а потім спробуйте зробити знімок екрана";
+"Enable Screen Recording, then quit and reopen macshot" = "Увімкніть запис екрана, потім закрийте та знову відкрийте macshot";
 "Open Screen Recording Settings" = "Відкрити параметри запису екрана";
 "Continue" = "Продовжити";
 

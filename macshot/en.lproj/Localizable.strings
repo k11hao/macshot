@@ -413,6 +413,7 @@
 "Screen Recording not yet granted" = "Screen Recording not yet granted";
 "Screen Recording granted!" = "Screen Recording granted!";
 "Enable macshot, then try taking a screenshot" = "Enable macshot, then try taking a screenshot";
+"Enable Screen Recording, then quit and reopen macshot" = "Enable Screen Recording, then quit and reopen macshot";
 "Open Screen Recording Settings" = "Open Screen Recording Settings";
 "Continue" = "Continue";
 

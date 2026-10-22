@@ -387,6 +387,7 @@
 "Screen Recording not yet granted" = "画面収録がまだ許可されていません";
 "Screen Recording granted!" = "画面収録が許可されました!";
 "Enable macshot, then try taking a screenshot" = "macshot を有効にして、スクリーンショットを撮ってみてください";
+"Enable Screen Recording, then quit and reopen macshot" = "画面収録を有効にしてから、macshot を終了して開き直してください";
 "Open Screen Recording Settings" = "画面収録の設定を開く";
 "Continue" = "続ける";
 

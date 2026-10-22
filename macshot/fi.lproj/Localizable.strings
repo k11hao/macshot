@@ -403,6 +403,7 @@
 "Screen Recording not yet granted" = "Ruudun nauhoituslupaa ei ole vielä myönnetty";
 "Screen Recording granted!" = "Ruudun nauhoituslupa myönnetty!";
 "Enable macshot, then try taking a screenshot" = "Ota macshot käyttöön ja kokeile kuvakaappausta";
+"Enable Screen Recording, then quit and reopen macshot" = "Ota näytöntallennus käyttöön ja avaa macshot uudelleen";
 "Open Screen Recording Settings" = "Avaa ruudun nauhoitusasetukset";
 "Continue" = "Jatka";
 

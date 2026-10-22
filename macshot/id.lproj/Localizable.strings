@@ -405,6 +405,7 @@
 "Screen Recording not yet granted" = "Perekaman Layar belum diberikan";
 "Screen Recording granted!" = "Perekaman Layar diberikan!";
 "Enable macshot, then try taking a screenshot" = "Aktifkan macshot, lalu coba ambil tangkapan layar";
+"Enable Screen Recording, then quit and reopen macshot" = "Aktifkan Perekaman Layar, lalu tutup dan buka kembali macshot";
 "Open Screen Recording Settings" = "Buka Pengaturan Perekaman Layar";
 "Continue" = "Lanjutkan";
 

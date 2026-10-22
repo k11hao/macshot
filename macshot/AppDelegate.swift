@@ -413,6 +413,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         oc.show()
     }
 
+    /// A capture was refused because Screen Recording is not granted. Tear down
+    /// the half-started session and show the permission guide instead of leaving
+    /// macOS's blurred privacy image on screen.
+    private func abortCaptureForMissingScreenRecordingPermission() {
+        pendingRestoreLastArea = false
+        dismissOverlays(refocusPreviousApp: true)
+        showOnboarding()
+    }
+
     private func prewarmCapturePath() {
         // Warm the SCShareableContent cache (cheap, async).
         ScreenCaptureManager.prewarm()
@@ -1112,6 +1121,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     }
 
     private func beginCaptureArea(fromMenu: Bool) {
+        guard canStartCapture else { return }
         startCapture(fromMenu: fromMenu)
     }
 
@@ -1274,14 +1284,31 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     /// the flags inside `startCapture`'s `!isCapturing` guard, because during a
     /// delay-capture countdown `isCapturing` is already true and the pending mode
     /// belongs to that accepted (not-yet-consumed) capture.
+    ///
+    /// Screen Recording is checked here as well: without it macOS answers every
+    /// capture API with a privacy-blurred desktop image, so the overlay would
+    /// show a blurry "screenshot" and each attempt would re-trigger the system
+    /// consent prompt. Show the permission guide instead.
     private var canStartCapture: Bool {
-        !isCapturing && recordingEngine == nil
+        guard !isCapturing && recordingEngine == nil else { return false }
+        guard PermissionOnboardingController.hasScreenRecordingPermission() else {
+            showOnboarding()
+            return false
+        }
+        return true
     }
 
     private func startCapture(fromMenu: Bool = false, recordingAsGIF: Bool = false) {
         guard !isCapturing else { return }
         // Don't allow captures while recording
         guard recordingEngine == nil else { return }
+        // Entry points normally check `canStartCapture`, but captures can also
+        // reach here from a delay countdown. Never start one without Screen
+        // Recording: the fallback would show a blurred privacy image.
+        guard PermissionOnboardingController.hasScreenRecordingPermission() else {
+            showOnboarding()
+            return
+        }
         nextRecordingIsGIF = recordingAsGIF
         let trace = makeCaptureTimingTrace()
         captureTimingTrace = trace
@@ -1490,10 +1517,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         Task { [weak self] in
             trace?.mark("background screenshot begin")
             var captures: [ScreenCapture]? = nil
+            var permissionDenied = false
             if #available(macOS 14.0, *) {
                 // Install each display's overlay as soon as its own capture
                 // lands, cursor display first, instead of waiting for all of them.
-                captures = await ScreenCaptureManager.captureAllScreensImmediatelySCK(
+                let batch = await ScreenCaptureManager.captureAllScreensImmediatelySCK(
                     priorityScreen: mouseScreen,
                     timing: { label in trace?.mark(label) },
                     onCapture: { capture in
@@ -1516,6 +1544,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
                         // on the display the user is working on.
                         if !isFirst { self.refocusOverlay(among: controllers, installed: progressive.installed) }
                     })
+                captures = batch?.captures
+                permissionDenied = batch?.permissionDenied ?? false
+            }
+            // Without Screen Recording, the window-list fallback returns macOS's
+            // privacy-blurred desktop. Never present that as a screenshot: ask for
+            // the permission instead.
+            if permissionDenied {
+                trace?.mark("background screenshot end — screen recording denied")
+                await MainActor.run {
+                    guard let self = self, self.isCapturing,
+                          self.captureSessionID == sessionID else { return }
+                    self.abortCaptureForMissingScreenRecordingPermission()
+                }
+                return
             }
             if let captures, progressive.shownAny {
                 trace?.mark("background screenshot end count=\(captures.count) (progressive)")

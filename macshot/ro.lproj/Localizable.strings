@@ -398,6 +398,7 @@
 "Screen Recording not yet granted" = "Înregistrarea ecranului nu a fost încă acordată";
 "Screen Recording granted!" = "Înregistrarea ecranului a fost acordată!";
 "Enable macshot, then try taking a screenshot" = "Activează macshot, apoi încearcă să faci o captură de ecran";
+"Enable Screen Recording, then quit and reopen macshot" = "Activează Înregistrarea ecranului, apoi redeschide macshot";
 "Open Screen Recording Settings" = "Deschide setările de înregistrare a ecranului";
 "Continue" = "Continuă";
 

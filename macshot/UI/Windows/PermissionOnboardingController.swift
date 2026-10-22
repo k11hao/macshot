@@ -231,10 +231,23 @@ class PermissionOnboardingController: NSWindowController {
         actionButton?.isHidden = false
         continueButton?.isHidden = true
 
+        // ScreenCaptureKit refused during this process. macOS only applies a new
+        // Screen Recording grant after the app is relaunched, so don't let the
+        // poll flip this window to "granted" and immediately fail again.
+        let retryRequired = ScreenRecordingPermission.shared.wasDenied
+        if retryRequired {
+            spinner?.stopAnimation(nil)
+            spinner?.isHidden = true
+            statusLabel?.stringValue = L("Enable Screen Recording, then quit and reopen macshot")
+            continueButton?.isHidden = false
+        }
+
         window?.center()
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-        startPolling()
+        if !retryRequired {
+            startPolling()
+        }
     }
 
     // MARK: - Permission polling
@@ -261,7 +274,11 @@ class PermissionOnboardingController: NSWindowController {
     /// Check screen recording permission without triggering a system dialog.
     /// Uses CGPreflightScreenCaptureAccess() which is purely a status query.
     /// NOTE: This may return a stale cached value if permission was revoked since launch.
+    /// A refusal reported by ScreenCaptureKit during this process also counts as
+    /// missing: macOS keeps returning the privacy-blurred desktop until the app
+    /// is relaunched, and every capture attempt re-triggers the system prompt.
     static func hasScreenRecordingPermission() -> Bool {
+        guard !ScreenRecordingPermission.shared.wasDenied else { return false }
         return CGPreflightScreenCaptureAccess()
     }
 
@@ -305,6 +322,9 @@ class PermissionOnboardingController: NSWindowController {
         pollTimer?.invalidate()
         pollTimer = nil
         window?.orderOut(nil)
+        // The user chose to retry after a refusal; let the next capture attempt
+        // ask ScreenCaptureKit again.
+        ScreenRecordingPermission.shared.clearDenial()
         onPermissionGranted?()
     }
 }

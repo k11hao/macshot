@@ -405,6 +405,7 @@
 "Screen Recording not yet granted" = "Nahrávanie obrazovky ešte nie je povolené";
 "Screen Recording granted!" = "Nahrávanie obrazovky povolené!";
 "Enable macshot, then try taking a screenshot" = "Povolte macshot a skúste urobiť snímku obrazovky";
+"Enable Screen Recording, then quit and reopen macshot" = "Povolte záznam obrazovky, potom macshot znova otvorte";
 "Open Screen Recording Settings" = "Otvoriť nastavenia nahrávania obrazovky";
 "Continue" = "Pokračovať";
 

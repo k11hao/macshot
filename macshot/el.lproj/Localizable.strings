@@ -405,6 +405,7 @@
 "Screen Recording not yet granted" = "Η εγγραφή οθόνης δεν έχει παραχωρηθεί ακόμα";
 "Screen Recording granted!" = "Η εγγραφή οθόνης παραχωρήθηκε!";
 "Enable macshot, then try taking a screenshot" = "Ενεργοποιήστε το macshot και δοκιμάστε να τραβήξετε στιγμιότυπο";
+"Enable Screen Recording, then quit and reopen macshot" = "Ενεργοποιήστε την καταγραφή οθόνης και μετά κλείστε και ανοίξτε ξανά το macshot";
 "Open Screen Recording Settings" = "Άνοιγμα ρυθμίσεων εγγραφής οθόνης";
 "Continue" = "Συνέχεια";
 

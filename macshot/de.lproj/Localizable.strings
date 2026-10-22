@@ -395,6 +395,7 @@
 "Screen Recording not yet granted" = "Bildschirmaufnahme noch nicht erlaubt";
 "Screen Recording granted!" = "Bildschirmaufnahme erlaubt!";
 "Enable macshot, then try taking a screenshot" = "Aktivieren Sie macshot und erstellen Sie dann einen Screenshot";
+"Enable Screen Recording, then quit and reopen macshot" = "Aktivieren Sie die Bildschirmaufnahme und starten Sie macshot dann neu";
 "Open Screen Recording Settings" = "Bildschirmaufnahme-Einstellungen öffnen";
 "Continue" = "Weiter";
 

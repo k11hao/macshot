@@ -404,6 +404,7 @@
 "Screen Recording not yet granted" = "Chưa cấp quyền Quay màn hình";
 "Screen Recording granted!" = "Đã cấp quyền Quay màn hình!";
 "Enable macshot, then try taking a screenshot" = "Bật macshot, rồi thử chụp ảnh màn hình";
+"Enable Screen Recording, then quit and reopen macshot" = "Bật Ghi màn hình, rồi thoát và mở lại macshot";
 "Open Screen Recording Settings" = "Mở Cài đặt Quay màn hình";
 "Continue" = "Tiếp tục";
 

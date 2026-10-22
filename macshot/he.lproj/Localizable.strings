@@ -398,6 +398,7 @@
 "Screen Recording not yet granted" = "הרשאת הקלטת מסך טרם ניתנה";
 "Screen Recording granted!" = "הרשאת הקלטת מסך אושרה!";
 "Enable macshot, then try taking a screenshot" = "הפעל את macshot ואז נסה לצלם מסך";
+"Enable Screen Recording, then quit and reopen macshot" = "הפעל את הקלטת המסך, ואז סגור ופתח מחדש את macshot";
 "Open Screen Recording Settings" = "פתח הגדרות הקלטת מסך";
 "Continue" = "המשך";
 

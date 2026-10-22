@@ -405,6 +405,7 @@
 "Screen Recording not yet granted" = "Snimanje zaslona još nije odobreno";
 "Screen Recording granted!" = "Snimanje zaslona odobreno!";
 "Enable macshot, then try taking a screenshot" = "Omogućite macshot, zatim pokušajte snimiti zaslon";
+"Enable Screen Recording, then quit and reopen macshot" = "Omogućite snimanje zaslona, zatim ponovno otvorite macshot";
 "Open Screen Recording Settings" = "Otvori postavke snimanja zaslona";
 "Continue" = "Nastavi";
 

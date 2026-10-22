@@ -387,6 +387,7 @@
 "Screen Recording not yet granted" = "화면 기록 권한이 아직 허용되지 않았습니다";
 "Screen Recording granted!" = "화면 기록 권한이 허용되었습니다!";
 "Enable macshot, then try taking a screenshot" = "macshot을 활성화한 후 스크린샷을 찍어보세요";
+"Enable Screen Recording, then quit and reopen macshot" = "화면 기록을 활성화한 다음 macshot을 종료하고 다시 여세요";
 "Open Screen Recording Settings" = "화면 기록 설정 열기";
 "Continue" = "계속";
 

@@ -398,6 +398,7 @@
 "Screen Recording not yet granted" = "Ekran Kaydı izni henüz verilmedi";
 "Screen Recording granted!" = "Ekran Kaydı izni verildi!";
 "Enable macshot, then try taking a screenshot" = "macshot'u etkinleştirin, ardından ekran görüntüsü almayı deneyin";
+"Enable Screen Recording, then quit and reopen macshot" = "Ekran Kaydı'nı etkinleştirin, ardından macshot'u kapatıp yeniden açın";
 "Open Screen Recording Settings" = "Ekran Kaydı Ayarlarını Aç";
 "Continue" = "Devam";
 

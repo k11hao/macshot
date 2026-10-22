@@ -403,6 +403,7 @@
 "Screen Recording not yet granted" = "திரைப் பதிவு இன்னும் வழங்கப்படவில்லை";
 "Screen Recording granted!" = "திரைப் பதிவு வழங்கப்பட்டது!";
 "Enable macshot, then try taking a screenshot" = "macshot ஐ இயக்கி, திரைப்பிடிப்பு எடுக்க முயற்சிக்கவும்";
+"Enable Screen Recording, then quit and reopen macshot" = "திரைப் பதிவை இயக்கி, பின்னர் macshot ஐ மூடி மீண்டும் திறக்கவும்";
 "Open Screen Recording Settings" = "திரைப் பதிவு அமைப்புகளைத் திற";
 "Continue" = "தொடரவும்";
 

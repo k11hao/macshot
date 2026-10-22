@@ -394,6 +394,7 @@
 "Screen Recording not yet granted" = "Schermopname nog niet toegestaan";
 "Screen Recording granted!" = "Schermopname toegestaan!";
 "Enable macshot, then try taking a screenshot" = "Schakel macshot in en probeer een schermafbeelding te maken";
+"Enable Screen Recording, then quit and reopen macshot" = "Schakel schermopname in en open macshot opnieuw";
 "Open Screen Recording Settings" = "Open schermopname-instellingen";
 "Continue" = "Ga door";
 

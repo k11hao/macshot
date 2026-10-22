@@ -405,6 +405,7 @@
 "Screen Recording not yet granted" = "Hindi pa naibibigay ang Screen Recording";
 "Screen Recording granted!" = "Naibigay na ang Screen Recording!";
 "Enable macshot, then try taking a screenshot" = "I-enable ang macshot, pagkatapos ay subukang kumuha ng screenshot";
+"Enable Screen Recording, then quit and reopen macshot" = "I-enable ang Screen Recording, pagkatapos ay isara muli ang macshot";
 "Open Screen Recording Settings" = "Buksan ang Screen Recording Settings";
 "Continue" = "Magpatuloy";
 
