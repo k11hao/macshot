@@ -46,8 +46,10 @@ macshot/
 ├── Capture/
 │   ├── ScreenCaptureManager.swift      # Multi-screen capture via ScreenCaptureKit (async/await)
 │   ├── RecordingEngine.swift           # Screen recording to durable MP4 originals
-│   ├── ScrollCaptureController.swift   # Scroll capture with SAD-based stitching
-│   ├── ScrollFrameAnalyzer.swift       # Pure pixel comparison: frozen header + scrollbar detection
+│   ├── ScrollCaptureController.swift   # Scroll capture engine: SCK snapshots, alignment, frozen chrome, polling
+│   ├── ScrollFrameAnalyzer.swift       # Pure pixel comparison: row-signature alignment, fixed header/footer, scrollbar
+│   ├── ScrollStitcher.swift            # Incremental strip accumulator + final composite
+│   ├── ScrollCaptureGeometry.swift     # AppKit → ScreenCaptureKit source-rect conversion
 │   ├── GIFExporter.swift              # Edited timeline → timestamped GIF frames
 │   ├── GIFEncoder.swift               # Bounded-memory streaming GIF writer
 │   ├── CursorTelemetry.swift          # Pointer/click/key data file format + media-clock view (CursorRecording)
@@ -267,7 +269,7 @@ The video editor is built around `VideoEditorDocument` (one `VideoProject`: time
 ### Threading Model
 - **Capture:** Displays are captured one at a time, the one under the pointer first (on macOS 26 `replayd` serializes concurrent screenshot requests and charges far more per queued request). Each display's overlay is shown as soon as its capture lands; keyboard focus stays on the display with a selection, else the one under the pointer, and a partial failure falls back only for the displays not yet shown.
 - **Recording:** SCStream output on background thread, main actor for state updates
-- **Scroll capture:** Background throttle/settlement timers, serialized captureAndStitch
+- **Scroll capture:** Async ScreenCaptureKit snapshots on a main-actor loop; 150 ms manual polling; frame processing is serialized
 - **OCR:** VNImageRequestHandler on background thread, results to main
 - **Upload:** URLSession background task
 - **GIF:** Frame encoding on background thread
@@ -297,7 +299,7 @@ Copy to clipboard, Save to file (PNG/JPEG/HEIC/WebP), Pin (floating always-on-to
 - **Editor Window:** Standalone resizable window for post-capture editing, full annotation tools, zoom 0.1x–8x via NSScrollView
 - **Video Editor:** Standalone video editor window for trimming, exporting, and uploading recorded videos
 - **Screen Recording:** MP4/GIF, annotation mode during recording, configurable FPS (up to 120fps), mouse click highlighting, system audio capture
-- **Scroll Capture:** Automatic scroll detection + stitching via SAD matching
+- **Scroll Capture:** ScreenCaptureKit snapshots + row-signature alignment + incremental strip stitching, fixed header/footer handling
 - **Auto-Redact:** Right-click filled rect → regex patterns (emails, phones, SSN, credit cards, IPs, AWS keys, bearer tokens)
 - **Barcode/QR Detection:** Live Vision detection with decoded payload, open/copy actions
 - **Floating Thumbnail:** Stackable, draggable, auto-dismiss, quick actions
@@ -360,7 +362,7 @@ Copy to clipboard, Save to file (PNG/JPEG/HEIC/WebP), Pin (floating always-on-to
 - `scripts/run-tests.sh` runs everything; add `--offline` for the offline variant, and pass `ClassName` or `ClassName/testName` to narrow it. It reports failures and preserves the full log/result bundle on failure. Set `MACSHOT_KEEP_TEST_RESULTS=1` to preserve successful results too. Empty/all-skipped runs are errors.
 - The `macshotTests` target compiles the app sources directly (a synchronized group over `macshot/`, minus `main.swift`), so there is **no host app**: tests run headless, with no Screen Recording permission and no window server dependency. `internal` symbols are reachable without `@testable import`; `private` ones are not.
 - Shared helpers live in `macshotTests/TestSupport.swift`: `withDefaults` (isolated UserDefaults), `ImageProbe` (scale-independent fixture images + pixel probes — never build fixtures with `lockFocus`, it produces 2x buffers on Retina and 1x in CI), `TestKeyEvent` (synthesized `NSEvent`s), and `Reflect`/`FieldDescriber` (compare every stored property of a value at once).
-- Logic that is worth testing but buried in a permission-gated class should be extracted rather than left untested — see `ScrollFrameAnalyzer` and `RecordingEngine.cropRect(for:displayBounds:)`.
+- Logic that is worth testing but buried in a permission-gated class should be extracted rather than left untested — see `ScrollFrameAnalyzer`, `ScrollStitcher` and `RecordingEngine.cropRect(for:displayBounds:)`.
 - `.github/workflows/tests.yml` runs the suite plus a Release build of both variants on every push and PR. The Release build is what catches strict-concurrency errors that Debug builds let through.
 
 ## Build & Run
